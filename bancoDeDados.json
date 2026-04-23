@@ -1,0 +1,25 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nome": "admin",
+      "senha": "123",
+      "email": "admin@email.com"
+    },
+    {
+      "id": 2,
+      "nome": "Maria",
+      "senha": "456",
+      "email": "maria@email.com"
+    }
+  ],
+  "tarefas": [
+    {
+      "usuarioId": 1,
+      "titulo": "Teste",
+      "descricao": "Teste",
+      "concluida": false,
+      "id": 1
+    }
+  ]
+}

@@ -1,30 +1,51 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, Alert, KeyboardAvoidingView, Platform,
+  StyleSheet, Alert, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 
-// Credenciais fixas (sem back-end por enquanto)
-const USUARIO_VALIDO = 'admin';
-const SENHA_VALIDA   = '123';
+const API_URL = 'http://10.125.214.183:3000';
 
 export default function LoginScreen() {
-  const [usuario, setUsuario]           = useState('');
-  const [senha, setSenha]               = useState('');
+  const [usuario, setUsuario] = useState('');
+  const [senha, setSenha] = useState('');
   const [senhaVisivel, setSenhaVisivel] = useState(false);
+  const [carregando, setCarregando] = useState(false);
   const router = useRouter();
 
-  const handleLogin = () => {
-    if (usuario === USUARIO_VALIDO && senha === SENHA_VALIDA) {
+  const handleLogin = async () => {
+  if (!usuario || !senha) {
+    Alert.alert('Atenção', 'Preencha todos os campos!');
+    return;
+  }
+
+  setCarregando(true);
+  try {
+    const url = `${API_URL}/usuarios?nome=${usuario}&senha=${senha}`;
+    console.log('🔍 Buscando:', url); // ← vai aparecer no terminal do Expo
+
+    const resposta = await fetch(url);
+    console.log('📡 Status:', resposta.status);
+
+    const dados = await resposta.json();
+    console.log('📦 Dados recebidos:', JSON.stringify(dados));
+
+    if (dados.length > 0) {
       router.push({
         pathname: '/home',
-        params: { nome: usuario },
+        params: { nome: dados[0].nome, usuarioId: dados[0].id },
       });
     } else {
       Alert.alert('Erro', 'Usuário ou senha incorretos!');
     }
-  };
+  } catch (erro) {
+    console.log('❌ Erro:', erro); // ← mostra o erro real
+    Alert.alert('Erro', 'Não foi possível conectar ao servidor.');
+  } finally {
+    setCarregando(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView
@@ -32,15 +53,12 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.card}>
-
-        {/* Ícone e Títulos */}
         <View style={styles.iconContainer}>
           <Text style={styles.icon}>🔐</Text>
         </View>
         <Text style={styles.titulo}>Bem-vindo!</Text>
         <Text style={styles.subtitulo}>Faça login para continuar</Text>
 
-        {/* Campo de Usuário */}
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Usuário</Text>
           <TextInput
@@ -53,7 +71,6 @@ export default function LoginScreen() {
           />
         </View>
 
-        {/* Campo de Senha */}
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Senha</Text>
           <View style={styles.senhaContainer}>
@@ -69,109 +86,40 @@ export default function LoginScreen() {
               onPress={() => setSenhaVisivel(!senhaVisivel)}
               style={styles.olhoBtn}
             >
-              <Text style={styles.olhoIcon}>
-                {senhaVisivel ? '🙈' : '👁️'}
-              </Text>
+              <Text style={styles.olhoIcon}>{senhaVisivel ? '🙈' : '👁️'}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Botão de Login */}
-        <TouchableOpacity style={styles.botao} onPress={handleLogin}>
-          <Text style={styles.botaoTexto}>Entrar</Text>
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={handleLogin}
+          disabled={carregando}
+        >
+          {carregando
+            ? <ActivityIndicator color="#fff" />
+            : <Text style={styles.botaoTexto}>Entrar</Text>
+          }
         </TouchableOpacity>
-
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1a1a2e',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  card: {
-    width: '100%',
-    backgroundColor: '#16213e',
-    borderRadius: 24,
-    padding: 32,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  icon: {
-    fontSize: 40,
-  },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-  },
-  subtitulo: {
-    color: '#ccc',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  inputWrapper: {
-    marginBottom: 16,
-  },
-  label: {
-    color: '#ccc',
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: '#0f3460',
-    color: '#e2e8f0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: '#1e4d8c',
-  },
-  senhaContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0f3460',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#1e4d8c',
-  },
-  inputSenha: {
-    flex: 1,
-    color: '#e2e8f0',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-  },
-  olhoBtn: {
-    padding: 10,
-  },
-  olhoIcon: {
-    fontSize: 18,
-  },
-  botao: {
-    backgroundColor: '#e94560',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 12,
-    elevation: 6,
-  },
-  botaoTexto: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  container: { flex: 1, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  card: { width: '100%', backgroundColor: '#fff', borderRadius: 8, padding: 24, borderWidth: 1, borderColor: '#ccc' },
+  iconContainer: { alignItems: 'center', marginBottom: 10 },
+  icon: { fontSize: 32 },
+  titulo: { fontSize: 20, fontWeight: 'bold', color: '#333', textAlign: 'center' },
+  subtitulo: { color: '#888', textAlign: 'center', marginBottom: 20, fontSize: 13 },
+  inputWrapper: { marginBottom: 14 },
+  label: { color: '#555', marginBottom: 4, fontSize: 13 },
+  input: { backgroundColor: '#fff', color: '#333', borderRadius: 4, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, borderWidth: 1, borderColor: '#bbb' },
+  senhaContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 4, borderWidth: 1, borderColor: '#bbb' },
+  inputSenha: { flex: 1, color: '#333', paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
+  olhoBtn: { padding: 8 },
+  olhoIcon: { fontSize: 16 },
+  botao: { backgroundColor: '#4a90d9', borderRadius: 4, paddingVertical: 12, alignItems: 'center', marginTop: 10 },
+  botaoTexto: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
 });
