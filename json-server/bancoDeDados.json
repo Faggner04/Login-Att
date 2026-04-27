@@ -15,18 +15,11 @@
   ],
   "tarefas": [
     {
-      "id": 1,
       "usuarioId": 1,
-      "titulo": "Estudar React Native",
-      "descricao": "Revisar componentes e hooks",
-      "concluida": false
-    },
-    {
-      "id": 2,
-      "usuarioId": 1,
-      "titulo": "Fazer o projeto da faculdade",
-      "descricao": "Lista de tarefas com Expo",
-      "concluida": false
+      "titulo": "teste",
+      "descricao": "teste",
+      "concluida": false,
+      "id": 1
     }
   ]
 }

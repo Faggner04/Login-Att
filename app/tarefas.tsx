@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
-  StyleSheet, Alert, ActivityIndicator,
+  StyleSheet, Alert, ActivityIndicator, Modal,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -23,6 +23,11 @@ export default function TarefasScreen() {
   const [novoTitulo, setNovoTitulo] = useState('');
   const [novaDescricao, setNovaDescricao] = useState('');
   const [carregando, setCarregando] = useState(true);
+
+  const [modalVisivel, setModalVisivel] = useState(false);
+  const [tarefaEditando, setTarefaEditando] = useState<Tarefa | null>(null);
+  const [tituloEditado, setTituloEditado] = useState('');
+  const [descricaoEditada, setDescricaoEditada] = useState('');
 
   const buscarTarefas = async () => {
     try {
@@ -80,13 +85,45 @@ export default function TarefasScreen() {
   };
 
   const deletarTarefa = async (id: number) => {
+    Alert.alert('Confirmar', 'Deseja deletar esta tarefa?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Deletar', style: 'destructive', onPress: async () => {
+          try {
+            await fetch(`${API_URL}/tarefas/${id}`, { method: 'DELETE' });
+            setTarefas(prev => prev.filter(t => t.id !== id));
+          } catch {
+            Alert.alert('Erro', 'Não foi possível deletar a tarefa.');
+          }
+        }
+      },
+    ]);
+  };
+
+  const abrirEdicao = (tarefa: Tarefa) => {
+    setTarefaEditando(tarefa);
+    setTituloEditado(tarefa.titulo);
+    setDescricaoEditada(tarefa.descricao);
+    setModalVisivel(true);
+  };
+
+  const salvarEdicao = async () => {
+    if (!tituloEditado.trim()) {
+      Alert.alert('Atenção', 'O título não pode estar vazio!');
+      return;
+    }
     try {
-      await fetch(`${API_URL}/tarefas/${id}`, {
-        method: 'DELETE',
+      const resposta = await fetch(`${API_URL}/tarefas/${tarefaEditando!.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulo: tituloEditado, descricao: descricaoEditada }),
       });
-      setTarefas(prev => prev.filter(t => t.id !== id));
+      const atualizada: Tarefa = await resposta.json();
+      setTarefas(prev => prev.map(t => (t.id === atualizada.id ? atualizada : t)));
+      setModalVisivel(false);
+      setTarefaEditando(null);
     } catch {
-      Alert.alert('Erro', 'Não foi possível deletar a tarefa.');
+      Alert.alert('Erro', 'Não foi possível editar a tarefa.');
     }
   };
 
@@ -103,6 +140,9 @@ export default function TarefasScreen() {
           ) : null}
         </View>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => abrirEdicao(item)} style={styles.botaoEditar}>
+        <Text style={styles.botaoEditarTexto}>✏️</Text>
+      </TouchableOpacity>
       <TouchableOpacity onPress={() => deletarTarefa(item.id)} style={styles.botaoDeletar}>
         <Text style={styles.botaoDeletarTexto}>🗑️</Text>
       </TouchableOpacity>
@@ -111,6 +151,37 @@ export default function TarefasScreen() {
 
   return (
     <View style={styles.container}>
+
+      <Modal visible={modalVisivel} transparent animationType="fade">
+        <View style={styles.modalFundo}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitulo}>Editar Tarefa</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Título"
+              placeholderTextColor="#aaa"
+              value={tituloEditado}
+              onChangeText={setTituloEditado}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Descrição (opcional)"
+              placeholderTextColor="#aaa"
+              value={descricaoEditada}
+              onChangeText={setDescricaoEditada}
+            />
+            <View style={styles.modalBotoes}>
+              <TouchableOpacity style={styles.botaoCancelar} onPress={() => setModalVisivel(false)}>
+                <Text style={styles.botaoCancelarTexto}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.botaoSalvar} onPress={salvarEdicao}>
+                <Text style={styles.botaoSalvarTexto}>Salvar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.voltar}>← Voltar</Text>
@@ -170,6 +241,16 @@ const styles = StyleSheet.create({
   textoRiscado: { textDecorationLine: 'line-through', color: '#aaa' },
   tarefaDescricao: { color: '#888', fontSize: 12, marginTop: 2 },
   vazio: { color: '#aaa', textAlign: 'center', marginTop: 48, fontSize: 14 },
-  botaoDeletar: { padding: 8, marginLeft: 8 },
+  botaoEditar: { padding: 8, marginLeft: 4 },
+  botaoEditarTexto: { fontSize: 16 },
+  botaoDeletar: { padding: 8, marginLeft: 4 },
   botaoDeletarTexto: { fontSize: 16 },
+  modalFundo: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalCard: { backgroundColor: '#fff', borderRadius: 8, padding: 24, width: '100%', borderWidth: 1, borderColor: '#ccc' },
+  modalTitulo: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 16 },
+  modalBotoes: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10, marginTop: 8 },
+  botaoCancelar: { borderWidth: 1, borderColor: '#bbb', borderRadius: 4, paddingVertical: 8, paddingHorizontal: 16 },
+  botaoCancelarTexto: { color: '#888', fontSize: 14 },
+  botaoSalvar: { backgroundColor: '#4a90d9', borderRadius: 4, paddingVertical: 8, paddingHorizontal: 16 },
+  botaoSalvarTexto: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
 });
