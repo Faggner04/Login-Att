@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Relatorio Visual - Agenda e Gerenciamento de Tarefas</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #172033;
+        --muted: #667085;
+        --line: #d8deea;
+        --blue: #2563eb;
+        --green: #16a34a;
+        --red: #dc2626;
+        --orange: #f97316;
+        --purple: #7c3aed;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: var(--blue);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .hero {
+        background: #172033;
+        color: #fff;
+        padding: 44px 24px;
+      }
+
+      .container {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 0.8fr;
+        gap: 24px;
+        align-items: end;
+      }
+
+      .eyebrow {
+        color: #b8c7ff;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin-top: 8px;
+        font-size: clamp(30px, 5vw, 52px);
+        line-height: 1.05;
+      }
+
+      h2 {
+        margin-bottom: 16px;
+        font-size: 24px;
+      }
+
+      h3 {
+        font-size: 17px;
+      }
+
+      .hero p {
+        max-width: 720px;
+        color: #d8e0f3;
+        font-size: 17px;
+      }
+
+      .hero-meta {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        padding: 18px;
+      }
+
+      .hero-meta div {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .hero-meta div:last-child {
+        border-bottom: 0;
+      }
+
+      main {
+        padding: 28px 0 48px;
+      }
+
+      section {
+        margin-top: 28px;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+        box-shadow: 0 10px 24px rgba(23, 32, 51, 0.06);
+      }
+
+      .stat-number {
+        display: block;
+        font-size: 34px;
+        font-weight: 800;
+      }
+
+      .stat-label {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .ok {
+        color: var(--green);
+        font-weight: 800;
+      }
+
+      .fail {
+        color: var(--red);
+        font-weight: 800;
+      }
+
+      .warn {
+        color: var(--orange);
+        font-weight: 800;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--card);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+      }
+
+      th,
+      td {
+        padding: 13px 14px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      th {
+        background: #eef2ff;
+        color: #20304f;
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 26px;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .badge-ok {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .badge-fail {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .badge-warn {
+        background: #ffedd5;
+        color: #9a3412;
+      }
+
+      .two-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+
+      .list {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .list li {
+        margin: 8px 0;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+
+      .evidence {
+        overflow: hidden;
+      }
+
+      .evidence img {
+        width: 100%;
+        display: block;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .evidence h3 {
+        margin-bottom: 10px;
+      }
+
+      .note {
+        border-left: 5px solid var(--orange);
+        background: #fff7ed;
+      }
+
+      .footer {
+        margin-top: 28px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      @media (max-width: 820px) {
+        .hero-grid,
+        .two-columns,
+        .gallery,
+        .summary-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding: 34px 18px;
+        }
+      }
+
+      @media print {
+        body {
+          background: #fff;
+        }
+
+        .card,
+        .table-wrap {
+          box-shadow: none;
+        }
+
+        .hero {
+          background: #fff;
+          color: var(--text);
+          border-bottom: 2px solid var(--line);
+        }
+
+        .hero p,
+        .eyebrow {
+          color: var(--muted);
+        }
+
+        .hero-meta {
+          color: var(--text);
+          border-color: var(--line);
+          background: #fff;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Apresentacao academica</span>
+          <h1>Relatorio Visual de Testes e Seguranca</h1>
+          <p>
+            Agenda e Gerenciamento de Tarefas com validacao automatizada por Playwright,
+            evidencias reais de execucao e avaliacao baseada no OWASP Top 10:2025.
+          </p>
+        </div>
+        <div class="hero-meta">
+          <div><strong>Data</strong><span>22/06/2026</span></div>
+          <div><strong>Projeto</strong><span>Agenda de Tarefas</span></div>
+          <div><strong>Referencia</strong><span>OWASP Top 10:2025</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="summary-grid" aria-label="Resumo executivo">
+        <article class="card">
+          <span class="stat-number ok">10/10</span>
+          <span class="stat-label">testes aprovados</span>
+        </article>
+        <article class="card">
+          <span class="stat-number">50.1s</span>
+          <span class="stat-label">tempo total da suite</span>
+        </article>
+        <article class="card">
+          <span class="stat-number ok">9/10</span>
+          <span class="stat-label">itens OWASP conformes</span>
+        </article>
+        <article class="card">
+          <span class="stat-number warn">1</span>
+          <span class="stat-label">risco pendente principal</span>
+        </article>
+      </section>
+
+      <section class="two-columns">
+        <article class="card">
+          <h2>Ambiente</h2>
+          <ul class="list">
+            <li>Sistema: Windows</li>
+            <li>Node.js: v24.14.0</li>
+            <li>npm: 11.9.0</li>
+            <li>Expo: ~54.0.33</li>
+            <li>React Native: 0.81.5</li>
+            <li>Playwright: 1.60.0</li>
+            <li>Navegador: Chromium via Playwright</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Resultado Geral</h2>
+          <p>
+            A suite validou cadastro, login, login invalido, logout, criacao,
+            edicao, exclusao, conclusao, recorrencia e persistencia de dados.
+          </p>
+          <p>
+            A execucao final foi aprovada em todos os cenarios e gerou 10 imagens
+            de evidencia na pasta <strong>evidencias</strong>.
+          </p>
+        </article>
+      </section>
+
+      <section>
+        <h2>Cenarios Automatizados</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cenario</th>
+                <th>Resultado</th>
+                <th>Duracao</th>
+                <th>Evidencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Cadastro de usuario</td><td><span class="badge badge-ok">Aprovado</span></td><td>3.984s</td><td><a href="evidencias/01-cadastro-usuario.png">01-cadastro-usuario.png</a></td></tr>
+              <tr><td>2</td><td>Login valido</td><td><span class="badge badge-ok">Aprovado</span></td><td>4.184s</td><td><a href="evidencias/02-login-valido.png">02-login-valido.png</a></td></tr>
+              <tr><td>3</td><td>Login invalido</td><td><span class="badge badge-ok">Aprovado</span></td><td>3.628s</td><td><a href="evidencias/03-login-invalido.png">03-login-invalido.png</a></td></tr>
+              <tr><td>4</td><td>Logout</td><td><span class="badge badge-ok">Aprovado</span></td><td>4.277s</td><td><a href="evidencias/04-logout.png">04-logout.png</a></td></tr>
+              <tr><td>5</td><td>Criar tarefa</td><td><span class="badge badge-ok">Aprovado</span></td><td>4.288s</td><td><a href="evidencias/05-criar-tarefa.png">05-criar-tarefa.png</a></td></tr>
+              <tr><td>6</td><td>Editar tarefa</td><td><span class="badge badge-ok">Aprovado</span></td><td>4.747s</td><td><a href="evidencias/06-editar-tarefa.png">06-editar-tarefa.png</a></td></tr>
+              <tr><td>7</td><td>Excluir tarefa</td><td><span class="badge badge-ok">Aprovado</span></td><td>5.364s</td><td><a href="evidencias/07-excluir-tarefa.png">07-excluir-tarefa.png</a></td></tr>
+              <tr><td>8</td><td>Concluir tarefa</td><td><span class="badge badge-ok">Aprovado</span></td><td>6.153s</td><td><a href="evidencias/08-concluir-tarefa.png">08-concluir-tarefa.png</a></td></tr>
+              <tr><td>9</td><td>Criar tarefa recorrente</td><td><span class="badge badge-ok">Aprovado</span></td><td>4.805s</td><td><a href="evidencias/09-tarefa-recorrente.png">09-tarefa-recorrente.png</a></td></tr>
+              <tr><td>10</td><td>Persistencia dos dados apos reiniciar</td><td><span class="badge badge-ok">Aprovado</span></td><td>6.170s</td><td><a href="evidencias/10-persistencia-dados.png">10-persistencia-dados.png</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>Avaliacao OWASP Top 10:2025</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Status</th>
+                <th>Avaliacao</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>A01 Broken Access Control</td><td><span class="badge badge-ok">Conforme</span></td><td>Tarefas filtradas por userId e sessao local com dados minimos.</td></tr>
+              <tr><td>A02 Security Misconfiguration</td><td><span class="badge badge-ok">Conforme</span></td><td>Nao ha APIs externas, banco remoto ou segredos expostos em configuracao.</td></tr>
+              <tr><td>A03 Software Supply Chain Failures</td><td><span class="badge badge-fail">Nao Conforme</span></td><td>npm audit encontrou 26 vulnerabilidades transitivas; correcao completa exige upgrade maior do stack.</td></tr>
+              <tr><td>A04 Cryptographic Failures</td><td><span class="badge badge-ok">Conforme</span></td><td>Senhas novas usam hash SHA-256 com salt local.</td></tr>
+              <tr><td>A05 Injection</td><td><span class="badge badge-ok">Conforme</span></td><td>Entradas sao tratadas pelo React Native e sanitizadas antes de salvar.</td></tr>
+              <tr><td>A06 Insecure Design</td><td><span class="badge badge-ok">Conforme</span></td><td>Fluxo exige autenticacao, isola tarefas por usuario e valida dados principais.</td></tr>
+              <tr><td>A07 Authentication Failures</td><td><span class="badge badge-ok">Conforme</span></td><td>Senha minima, erro generico e limite temporario de tentativas invalidas.</td></tr>
+              <tr><td>A08 Software or Data Integrity Failures</td><td><span class="badge badge-ok">Conforme</span></td><td>Operacoes centralizadas em servicos e persistidas com AsyncStorage.</td></tr>
+              <tr><td>A09 Security Logging and Alerting Failures</td><td><span class="badge badge-ok">Conforme</span></td><td>Eventos locais de auditoria para autenticacao e tarefas.</td></tr>
+              <tr><td>A10 Mishandling of Exceptional Conditions</td><td><span class="badge badge-ok">Conforme</span></td><td>Fallback em leitura JSON, mensagens controladas e validacao antes de salvar.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="two-columns">
+        <article class="card">
+          <h2>Melhorias Implementadas</h2>
+          <ul class="list">
+            <li>Hash de senha com salt.</li>
+            <li>Limite de tentativas de login.</li>
+            <li>Sanitizacao de entradas.</li>
+            <li>Validacao de data e horario.</li>
+            <li>Registro local de auditoria.</li>
+            <li>Testes Playwright com screenshots reais.</li>
+          </ul>
+        </article>
+        <article class="card note">
+          <h2>Ponto de Atencao</h2>
+          <p>
+            O item A03 ficou como Nao Conforme porque as dependencias transitivas
+            ainda possuem alertas no npm audit. A recomendacao e planejar upgrade
+            controlado para versoes maiores do Expo e React Native.
+          </p>
+        </article>
+      </section>
+
+      <section>
+        <h2>Evidencias Visuais</h2>
+        <div class="gallery">
+          <article class="card evidence"><h3>01 - Cadastro de usuario</h3><a href="evidencias/01-cadastro-usuario.png"><img src="evidencias/01-cadastro-usuario.png" alt="Cadastro de usuario" /></a></article>
+          <article class="card evidence"><h3>02 - Login valido</h3><a href="evidencias/02-login-valido.png"><img src="evidencias/02-login-valido.png" alt="Login valido" /></a></article>
+          <article class="card evidence"><h3>03 - Login invalido</h3><a href="evidencias/03-login-invalido.png"><img src="evidencias/03-login-invalido.png" alt="Login invalido" /></a></article>
+          <article class="card evidence"><h3>04 - Logout</h3><a href="evidencias/04-logout.png"><img src="evidencias/04-logout.png" alt="Logout" /></a></article>
+          <article class="card evidence"><h3>05 - Criar tarefa</h3><a href="evidencias/05-criar-tarefa.png"><img src="evidencias/05-criar-tarefa.png" alt="Criar tarefa" /></a></article>
+          <article class="card evidence"><h3>06 - Editar tarefa</h3><a href="evidencias/06-editar-tarefa.png"><img src="evidencias/06-editar-tarefa.png" alt="Editar tarefa" /></a></article>
+          <article class="card evidence"><h3>07 - Excluir tarefa</h3><a href="evidencias/07-excluir-tarefa.png"><img src="evidencias/07-excluir-tarefa.png" alt="Excluir tarefa" /></a></article>
+          <article class="card evidence"><h3>08 - Concluir tarefa</h3><a href="evidencias/08-concluir-tarefa.png"><img src="evidencias/08-concluir-tarefa.png" alt="Concluir tarefa" /></a></article>
+          <article class="card evidence"><h3>09 - Tarefa recorrente</h3><a href="evidencias/09-tarefa-recorrente.png"><img src="evidencias/09-tarefa-recorrente.png" alt="Tarefa recorrente" /></a></article>
+          <article class="card evidence"><h3>10 - Persistencia</h3><a href="evidencias/10-persistencia-dados.png"><img src="evidencias/10-persistencia-dados.png" alt="Persistencia dos dados" /></a></article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Conclusao</h2>
+        <p>
+          A aplicacao passou em todos os 10 testes automatizados e atingiu 9 de 10
+          itens conformes na avaliacao OWASP Top 10:2025. Para uma apresentacao
+          academica, o resultado demonstra funcionamento completo, evidencias
+          reais e uma analise honesta dos riscos pendentes.
+        </p>
+      </section>
+
+      <p class="footer">
+        Relatorio visual gerado a partir de RELATORIO_TESTES.md e RELATORIO_SEGURANCA_E_TESTES.md.
+      </p>
+    </main>
+  </body>
+</html>

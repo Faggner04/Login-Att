@@ -5,7 +5,9 @@ node_modules/
 
 # Expo
 .expo/
+.expo-home/
 dist/
+dist-check/
 web-build/
 expo-env.d.ts
 
@@ -25,6 +27,7 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+.npm-cache/
 
 # macOS
 .DS_Store
@@ -39,3 +42,10 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

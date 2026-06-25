@@ -1,14 +1,17 @@
 {
-  "name": "login-att",
+  "name": "agenda-gerenciamento-tarefas",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "expo": "~54.0.33",
     "expo-router": "~6.0.23",
     "expo-status-bar": "~3.0.9",
@@ -20,8 +23,7 @@
     "react-native-web": "^0.21.0"
   },
   "devDependencies": {
-    "@types/react": "~19.1.0",
-    "typescript": "~5.9.2"
+    "@playwright/test": "^1.60.0"
   },
   "private": true
 }

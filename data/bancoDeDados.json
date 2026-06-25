@@ -1,13 +1,13 @@
 {
   "usuarios": [
     {
-      "id": 1,
+      "id": "1",
       "nome": "admin",
       "senha": "123",
       "email": "admin@email.com"
     },
     {
-      "id": 2,
+      "id": "2",
       "nome": "Maria",
       "senha": "456",
       "email": "maria@email.com"
@@ -15,11 +15,12 @@
   ],
   "tarefas": [
     {
-      "usuarioId": 1,
-      "titulo": "teste",
-      "descricao": "teste",
+      "usuarioId": 2,
+      "titulo": "Jshrvfh",
+      "descricao": "Hdiehrb",
       "concluida": false,
-      "id": 1
+      "id": "2"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }
